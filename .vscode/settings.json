@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/bb55cc20-bfe0-4527-94ff-eb0f93011f1b/resourceGroups/Neuness/providers/Microsoft.Web/sites/IsLieOrIs",
+    "appService.deploySubpath": "."
+}

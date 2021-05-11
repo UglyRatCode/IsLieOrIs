@@ -1,11 +1,16 @@
 const http = require('http');
 
-const server = http.createServer((request, response) => {
-    response.writeHead(200, {"Content-Type": "text/plain"});
-    response.end("Hello World!");
+
+'use strict';
+
+const express = require('express');
+const app = express();
+const glblPort = process.env.PORT || 1337;
+
+app.use(express.static(__dirname + '/public'));
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/public/index.html');
 });
 
-const port = process.env.PORT || 1337;
-server.listen(port);
+var server = app.listen(glblPort, () => { console.log('the server is now running on port ', glblPort) });
 
-console.log("Server running at http://localhost:%d", port);
