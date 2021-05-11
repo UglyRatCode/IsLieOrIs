@@ -1,2 +1,33 @@
-h1 {color:aquamarine; font-size: 12px;}
+/* Theme inspiration almost certainly from https://material.io/design/color/dark-theme.html#ui-application */
 
+/* Fonts taken from Google's API */
+@import url('https://fonts.googleapis.com/css2?family=Lobster&family=Montserrat&family=Roboto:wght@500&display=swap');
+
+body {
+    background-color: #121212;
+}
+
+h1 {
+    color: #6200EE; 
+    font-size: 40px;
+    font-family: 'Lobster', cursive;
+    padding-bottom: -5px;
+}
+
+h2{
+    color: #BB86FC; /* Subject to change, the pink is too yucky */
+    font-size: 20px;
+    font-family: 'Roboto', sans-serif;
+}
+
+/* TODO */
+p{
+    color:#000000
+}
+
+div {
+    padding-top: 10px;
+    padding-right: 30px;
+    padding-bottom: 5px;
+    padding-left: 60px;
+  }
