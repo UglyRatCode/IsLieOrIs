@@ -6,23 +6,22 @@
 <link rel="stylesheet" href="/Drip.css">
 <style>
 </style>
-<script src=""></script>
+
 <body>
 
 <div class="">
- <h1>This is a Heading</h1>
- <p>This is a paragraph.</p>
- <p>This is another paragraph.</p>
- <ul>
-     <li>This might be a list</li>
-     <li>Again</li>
-     <li>Again</li>
-     <li>Again</li>
+ <h2>Welcome to the session</h2>
+<button id='newSesh'>New Session</button>
+<button id='joinSesh'>Join Existing Session</button>
+<input id='roomcode'></input>
+<h3>Existing Members:</h3>
+ <ul id='roomMembers'>
  </ul>
 </div>
 <a href = 'testPage.html'>Niall's Page</a>
 
-<canvas id = "cnvs"></canvas>
-
+<canvas id="canvas" width="200" height="100"style="border:1px solid #000000;"></canvas>>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/client.js"></script>
 </body>
 </html>

@@ -12,3 +12,8 @@ app.get('/', (req, res) => {
 var server = app.listen(glblPort, () => { console.log('the server is now running on port ', glblPort) });
 
 var io = require('socket.io')(server);
+var activesessions = [];
+
+io.on('connection', (socket)=>{
+    socket.on('join',(room)=>{console.log(room)});
+})
