@@ -1,6 +1,3 @@
-const http = require('http');
-
-
 'use strict';
 
 const express = require('express');
@@ -14,3 +11,4 @@ app.get('/', (req, res) => {
 
 var server = app.listen(glblPort, () => { console.log('the server is now running on port ', glblPort) });
 
+var io = require('socket.io')(server);
