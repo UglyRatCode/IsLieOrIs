@@ -22,6 +22,9 @@ join.addEventListener('click', () => {socket.emit('join',roomInput.value,(respon
 });
 news.addEventListener('click',() => {socket.emit('new',(response) => {
     if (response.status == 404) alert ('Room could not be created');
-    else myRoom = response.code;
+    else{ 
+        myRoom = response.code;
+        roomDisplay.innerHTML = 'Room Code: ' + myRoom;
+    }
 });
 });
