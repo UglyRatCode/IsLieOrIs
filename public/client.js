@@ -15,7 +15,7 @@ var testDiv = document.getElementById('teststuff');
 //set up other variables
 
 var myRoom;
-console.log(JSON.stringify(socket.auth.seshID));
+console.log(JSON.stringify(socket.auth));
 
 //set up DOM bits
 var roomDisplay = document.createElement('p');
@@ -23,11 +23,7 @@ roomDisplay.innerHTML = 'Room Code: ';
 testDiv.appendChild(roomDisplay);
 
 //event listeners
-join.addEventListener('click', () => {socket.emit('join',roomInput.value,(response) => {
-    if(response.status == 404) alert('No room found');
-    else setRoom(response.code);
-});
-});
+join.addEventListener('click', ()=>joinRoom(roomInput.value));
 
 news.addEventListener('click',() => {socket.emit('new',(response) => {
     if (response.status == 404) alert ('Room could not be created');
@@ -36,9 +32,12 @@ news.addEventListener('click',() => {socket.emit('new',(response) => {
 });
 
 //socket listeners
-socket.on('session',(sessionID) => {
-    socket.auth = {seshID: sessionID};
-    localStorage.setItem('sessionID',sessionID);
+socket.on('connected',(sessionDetails) => {
+    socket.auth = {seshID: sessionDetails.seshID};
+    localStorage.setItem('sessionID',sessionDetails.seshID);
+    console.log(sessionDetails.roomID==true);
+    console.log(sessionDetails.roomID==false);
+    if(sessionDetails.roomID) {joinRoom(sessionDetails.roomID);};
 });
 
 //functions
@@ -46,4 +45,10 @@ socket.on('session',(sessionID) => {
 function setRoom(roomCode){
     myRoom = roomCode;
     roomDisplay.innerHTML = 'Room Code: ' + myRoom;
+}
+
+function joinRoom(roomCode){socket.emit('join',roomCode,(response) => {
+    if(response.status == 404) alert('No room found');
+    else setRoom(roomCode);
+});
 }

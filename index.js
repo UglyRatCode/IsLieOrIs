@@ -18,21 +18,26 @@ var activegames = [];
 //session middleware
 io.use((socket,next)=>
     {
+        let sesh = socket.handshake.auth.seshID;
         //if none, give it a session ID
-        if (!socket.handshake.auth.seshID){
+        if (!sesh || !getSession(sesh)){
             socket.seshID = newSessionID();
-            activegames.push(socket.seshID);
-        } else socket.seshID = socket.handshake.auth.seshID;
+            activesessions.push(new player(socket.seshID,'N'+ socket.seshID,0))
+        } else {
+            socket.seshID = sesh;
+            socket.roomID = getSession(sesh).roomID ?? false;
+        } 
         next();
     }
 );
 
 //socket handler
 io.on('connection', (socket)=>{
-    socket.emit('session',socket.seshID);
+    socket.emit('connected',{seshID: socket.seshID, roomID: socket.roomID});
     socket.on('join',(room,response)=>{
         if(roomExists(room)){
             socket.join(room);
+            activesessions[activesessions.indexOf(getSession(socket.seshID))].roomID = room;
             io.to(room).emit('new connection');
             response({status: 200});
         } else response({status: 404});
@@ -41,9 +46,10 @@ io.on('connection', (socket)=>{
         let id = newRoomID();
         if (id == "err") response({status: 404});
         else{
-            let newgame = new game(id,socket,socket,0);
+            let newgame = new game(id,getSession(socket.seshID),getSession(socket.seshID),0);
             activegames.push(newgame);
             socket.join(newgame.roomID);
+            activesessions[activesessions.indexOf(getSession(socket.seshID))].roomID = id;
             response({status:200, code:newgame.roomID});
     }});
 });
@@ -73,6 +79,15 @@ function roomExists(id){
     }
     return false;
 }
+
+function getSession(id){
+    for (let i=0;i<activesessions.length;i++){
+        if (activesessions[i].sessionID == id)
+            return activesessions[i];
+    }
+    return false;
+}
+
 class game {
     constructor(roomID,players,host,gameState){
         this.roomID = roomID;
@@ -90,8 +105,9 @@ class game {
 };
 
 class player {
-    constructor(sessionID, username){
+    constructor(sessionID, username, roomID){
         this.sessionID = sessionID;
         this.username = username;
+        this.roomID = roomID;
     }
 };
