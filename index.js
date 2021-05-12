@@ -16,4 +16,21 @@ var activesessions = [];
 
 io.on('connection', (socket)=>{
     socket.on('join',(room)=>{console.log(room)});
-})
+    socket.on('new', (response) => {
+        let id = newID();
+        if (id == "err") response({status: 404});
+        else{
+            activesessions.push(id);
+            socket.join(id);
+            response({status:200, code:id});
+    }});
+});
+
+function newID(){
+    let randID = Math.random().toString(36).slice(2,8);
+    if(activesessions.indexOf(randID) > -1)
+        newID();
+    else if (activesessions.length > 10000)
+        return "err";
+    else return randID();
+};
