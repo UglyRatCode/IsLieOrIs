@@ -3,8 +3,10 @@
 /* Fonts taken from Google's API */
 @import url('https://fonts.googleapis.com/css2?family=Lobster&family=Montserrat&family=Roboto:wght@500&display=swap');
 
+
+/* To use for background: #121212  */
 body {
-    background-color: #121212;
+    background-color: cornsilk;
 }
 
 h1 {
