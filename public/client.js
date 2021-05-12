@@ -7,8 +7,6 @@ var news  = document.getElementById('newSesh');
 var roomInput = document.getElementById('roomcode');
 var ctx = canvas.getContext('2d');
 
-
-
 resize();
 
 //set up other variables
@@ -24,7 +22,6 @@ document.addEventListener('mousedown', startDraw);
 document.addEventListener('mouseup', stopDraw);
 join.addEventListener('click', () => {socket.emit('join',roomInput.value)});
 news.addEventListener('click',() => {socket.emit('new')});
-
 
 //beware, functions below
 
