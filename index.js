@@ -13,7 +13,6 @@ var server = app.listen(glblPort, () => { console.log('the server is now running
 
 var io = require('socket.io')(server);
 var activesessions = [];
-var activegames = [];
 
 //session middleware
 io.use((socket,next)=>
@@ -43,7 +42,7 @@ io.on('connection', (socket)=>{
         } else response({status: 404});
     });
     socket.on('new', (response) => {
-        let id = newRoomID();
+        let id = newID();
         if (id == "err") response({status: 404});
         else{
             let newgame = new game(id,getSession(socket.seshID),getSession(socket.seshID),0);
@@ -54,17 +53,8 @@ io.on('connection', (socket)=>{
     }});
 });
 
-function newRoomID(){
+function newID(){
     let randID = Math.random().toString(36).slice(2,8);
-    if(activegames.indexOf(randID) > -1)
-        newID();
-    else if (activegames.length > 10000)
-        return "err";
-    else return randID;
-};
-
-function newSessionID(){
-    let randID = Math.random().toString(36).slice(2,12);
     if(activesessions.indexOf(randID) > -1)
         newID();
     else if (activesessions.length > 10000)
