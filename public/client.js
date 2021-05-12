@@ -23,7 +23,7 @@ document.addEventListener('mousemove', draw);
 document.addEventListener('mousedown', startDraw);
 document.addEventListener('mouseup', stopDraw);
 join.addEventListener('click', () => {socket.emit('join',roomInput.value)});
-new.addEventListener('click',() => {socket.emit('new')});
+news.addEventListener('click',() => {socket.emit('new')});
 
 
 //beware, functions below
