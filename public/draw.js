@@ -1,6 +1,8 @@
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
 
+//file for handling drawing logic
+
 
 var isDrawing = false;
 var lineWidth = 5;
