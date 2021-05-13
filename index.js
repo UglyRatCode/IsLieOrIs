@@ -25,7 +25,7 @@ io.use((socket,next)=>
             activesessions.push(new player(socket.seshID,'N'+ socket.seshID,0))
         } else {
             socket.seshID = sesh;
-            socket.roomID = getSession(sesh).roomID ?? false;
+            socket.roomID = getSession(sesh).roomID || false;
         } 
         next();
     }
