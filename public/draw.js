@@ -64,7 +64,6 @@ function getPosition(e){
 }
 function draw (e) {
     if (!isDrawing) return;
-    ctx.beginPath();
     ctx.lineCap = 'round';
     ctx.strokeStyle = strokeColour;
     ctx.lineWidth = strokeThiccness;
@@ -72,7 +71,9 @@ function draw (e) {
     ctx.lineTo(pos.x,pos.y);
     ctx.stroke();
 }
+
 function startDraw (e) {
+    ctx.beginPath();
     isDrawing = true;
     getPosition(e);
     ctx.moveTo(pos.x,pos.y);
