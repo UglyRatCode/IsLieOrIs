@@ -1,54 +1,118 @@
+//get the socket, don't autoconnect though because we need cookies first mmm cookies
 var socket = io({autoConnect: false});
 
-//get cookie mmm
-var sessionID = localStorage.getItem('sessionID');
-if(sessionID) socket.auth = {seshID: sessionID};
+//get cookie mmmm
+var player = {sessionID: localStorage.getItem('sessionID'), username: localStorage.getItem('username'), roomID: localStorage.getItem('roomID')};
+socket.auth = {player};
 socket.connect();
 
-//set up elements
+//get DOM Elements
+var submitUserForm = document.getElementById('submitName');
+var newRoomBtn = document.getElementById('newRoom');
+var joinRoomBtn = document.getElementById('joinRoom');
+var roomForm = document.getElementById('roomForm');
+var confirmJoinRoom = document.getElementById('confirmJoinRoom');
+var roomCodeDisplay = document.getElementById('RoomCodeDisplay');
+var membersList = document.getElementById('MembersList');
 
-var join  = document.getElementById('joinSesh');
-var news  = document.getElementById('newSesh');
-var roomInput = document.getElementById('roomcode');
-var testDiv = document.getElementById('teststuff');
 
-//set up other variables
+var promptUserDiv = document.getElementById('PromptUsername');
+var joinRoomDiv = document.getElementById('PromptRoom');
+var lobbyDiv = document.getElementById('Lobby');
+
+//set up local variables
 
 var myRoom;
-console.log(JSON.stringify(socket.auth));
 
-//set up DOM bits
-var roomDisplay = document.createElement('p');
-roomDisplay.innerHTML = 'Room Code: ';
-testDiv.appendChild(roomDisplay);
 
 //event listeners
-join.addEventListener('click', ()=>joinRoom(roomInput.value));
+submitUserForm.addEventListener('click',()=>setUsername(document.getElementById('nameInput').value));
 
-news.addEventListener('click',() => {socket.emit('new',(response) => {
-    if (response.status == 404) alert ('Room could not be created');
-    else setRoom(response.code);
+joinRoomBtn.addEventListener('click', () => {
+    if(roomForm.style.display =='none') roomForm.style.display = 'block';
+    else roomForm.style.display = 'none';
 });
+
+confirmJoinRoom.addEventListener('click', (e)=> {e.preventDefault(),joinRoom(document.getElementById('roomInput').value);});
+
+newRoomBtn.addEventListener('click',() => { 
+    console.log('clock');
+    socket.emit('new',(response) => {
+        if (response.status == 404) alert ('Room could not be created');
+        else setRoom(response.code);
+    });
 });
 
 //socket listeners
-socket.on('connected',(sessionDetails) => {
-    socket.auth = {seshID: sessionDetails.seshID};
-    localStorage.setItem('sessionID',sessionDetails.seshID);
-    console.log(sessionDetails.roomID==true);
-    console.log(sessionDetails.roomID==false);
+socket.on('connect_error', (err) =>{
+    console.log(err.message);
+    if(err.message == 'missing session'){
+        console.log('1');
+        player.sessionID = err.data.sessionID;
+        socket.auth = {player};
+        localStorage.setItem('sessionID',err.data.sessionID);
+        console.log(err.data.nameNeeded);
+        if(err.data.nameNeeded) displayUserPrompt(); 
+    }
+});
+socket.on('session_connected',(sessionDetails) => {
+    console.log('4');
+    console.log(JSON.stringify(sessionDetails));
+    player = sessionDetails;
+    //localStorage.setItem('sessionID',sessionDetails.player.sessionID);
     if(sessionDetails.roomID) {joinRoom(sessionDetails.roomID);};
 });
+socket.on('username_needed',()=>{
+    displayUserPrompt();
+});
 
-//functions
+//logic
+//displayRoomPrompt();
+
+
+// action functions
+
+function setUsername(username){
+    player.username = username;
+    socket.auth = {player};
+    localStorage.setItem('username', player.username);
+    socket.emit('update username', player.username);
+};
 
 function setRoom(roomCode){
-    myRoom = roomCode;
-    roomDisplay.innerHTML = 'Room Code: ' + myRoom;
-}
+    player.roomID = roomCode;
+    socket.auth = {player};
+    roomCodeDisplay.innerHTML = 'Room Code: ' + roomCode;
+    localStorage.setItem('roomID',roomCode);
+    displayLobby();
+};
 
-function joinRoom(roomCode){socket.emit('join',roomCode,(response) => {
-    if(response.status == 404) alert('No room found');
-    else setRoom(roomCode);
-});
-}
+function joinRoom(roomCode){
+    if (!roomCode) return;
+    socket.emit('join',roomCode,(response) => {
+        if(response.status == 404) alert('No room found');  //try to change to nice alert instead of AAAH BROWSER POPUP
+        else {
+            setRoom(roomCode);
+            displayLobby();
+        }
+    });
+};
+
+//dom functiosn
+
+function displayUserPrompt(){
+    promptUserDiv.style.display = "block";
+    joinRoomDiv.style.display = "none";
+    lobbyDiv.style.display = "none";
+};
+function displayRoomPrompt(){
+    promptUserDiv.style.display = "none";
+    joinRoomDiv.style.display = "block";
+    lobbyDiv.style.display = "none";
+};
+function displayLobby(){
+    promptUserDiv.style.display = "none";
+    joinRoomDiv.style.display = "none";
+    lobbyDiv.style.display = "block";
+};
+

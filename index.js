@@ -12,33 +12,43 @@ app.get('/', (req, res) => {
 var server = app.listen(glblPort, () => { console.log('the server is now running on port ', glblPort) });
 
 var io = require('socket.io')(server);
-var activesessions = [];
+var activeplayers = [];
 var activegames = [];
 
 //session middleware
 io.use((socket,next)=>
-    {
-        let sesh = socket.handshake.auth.seshID;
-        //if none, give it a session ID
-        if (!sesh || !getSession(sesh)){
-            socket.seshID = newSessionID();
-            activesessions.push(new player(socket.seshID,'N'+ socket.seshID,0))
+    {  
+        let authPlayer = socket.handshake.auth.player; 
+        //if session doesnt exist, send back a session id in an error
+        if (!authPlayer.sessionID){
+            console.log('1');
+            const err = new Error("missing session");
+            err.data = {sessionID: newSessionID(), nameNeeded: !authPlayer.username};
+            socket.player = new player(err.data.sessionID,null,null);
+            activeplayers.push(socket.player); 
+            next(err);
         } else {
-            socket.seshID = sesh;
-            socket.roomID = getSession(sesh).roomID || false;
+            socket.player = new player(authPlayer.sessionID, authPlayer.username, authPlayer.roomID);
+            console.log('userneeded? ' + (authPlayer.username || false));
+            next();
         } 
-        next();
+        
     }
 );
 
 //socket handler
 io.on('connection', (socket)=>{
-    socket.emit('connected',{seshID: socket.seshID, roomID: socket.roomID});
+    socket.emit('session_connected',socket.player);
+    if(!socket.player.username) io.to(socket.id).emit('username_needed');
+    console.log('connected');
+    socket.on('update username',(username) => {
+        socket.player.username = username;
+    });
     socket.on('join',(room,response)=>{
         if(roomExists(room)){
             socket.join(room);
-            activesessions[activesessions.indexOf(getSession(socket.seshID))].roomID = room;
-            io.to(room).emit('new connection');
+            socket.player.roomID = room;
+            io.to(room).emit('new_connection');
             response({status: 200});
         } else response({status: 404});
     });
@@ -46,14 +56,15 @@ io.on('connection', (socket)=>{
         let id = newRoomID();
         if (id == "err") response({status: 404});
         else{
-            let newgame = new game(id,getSession(socket.seshID),getSession(socket.seshID),0);
+            let newgame = new game(id,socket.player.sessionID,socket.player.sessionID,0);
             activegames.push(newgame);
             socket.join(newgame.roomID);
-            activesessions[activesessions.indexOf(getSession(socket.seshID))].roomID = id;
+            socket.player.roomID = id;
             response({status:200, code:newgame.roomID});
     }});
 });
 
+//functions
 function newRoomID(){
     let randID = Math.random().toString(36).slice(2,8);
     if(activegames.indexOf(randID) > -1)
@@ -64,10 +75,17 @@ function newRoomID(){
 };
 function newSessionID(){
     let randID = Math.random().toString(36).slice(2,12);
-    if(activesessions.indexOf(randID) > -1)
-        newID();
-    else if (activesessions.length > 10000)
+    let inUse = false;
+    for (let i = 0; i < activeplayers.size; i++){
+        if (activeplayers[i].sessionID == randID) {
+            inUse = true;
+            break;
+        };
+    };
+    if (activeplayers.size > 100000)
         return "err";
+    else if(inUse)
+        newSessionID(); 
     else return randID;
 };
 
@@ -75,14 +93,6 @@ function roomExists(id){
     for (let i=0;i<activegames.length;i++){
         if (activegames[i].roomID == id)
             return true;
-    }
-    return false;
-}
-
-function getSession(id){
-    for (let i=0;i<activesessions.length;i++){
-        if (activesessions[i].sessionID == id)
-            return activesessions[i];
     }
     return false;
 }
