@@ -63,7 +63,7 @@ canvas.addEventListener('mousedown', startDraw, {
 canvas.addEventListener('touchstart', startDraw, {
     passive: true
 });
-canvas.addEventListener('mouseup', stopDraw, {
+window.addEventListener('mouseup', stopDraw, {
     passive: true
 });
 canvas.addEventListener('touchstart', stopDraw, {
