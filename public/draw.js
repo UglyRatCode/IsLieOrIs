@@ -26,9 +26,9 @@ const colours = {
 const thicnesses = {
     "Small": 2,
     "Normal": 4,
-    "Large": 8,
-    "XL": 16,
-    "2XL": 32
+    "Large": 6,
+    "XL": 8,
+    "2XL": 12
 };
 
 //Arrays for remembering user strokes to allow undo/redo functionality
@@ -36,8 +36,6 @@ var undo_array = [];
 var redo_array = [];
 
 resize();
-setupButtons();
-setupGeneralListeners();
 
 //beware, functions below
 //resize canvas to half window size
@@ -74,11 +72,12 @@ function startDraw(e) {
 }
 
 function stopDraw(e) {
-    if (isDrawing) isDrawing = false;
+    isDrawing = false;
 }
 
 function changeStrokeColour(colour) {
     strokeColour = colours[colour];
+    console.log(`Trying to change colour to: ${colour}`)
 }
 
 function changeStrokeThiccness(thiccness) {
@@ -107,38 +106,4 @@ function restoreState(pop) {
             ctx.drawImage(myImage, 0, 0, canvas.width, canvas.height);
         }
     }
-}
-
-function setupButtons(){
-
-    //Sets up button functions - pulls by button class, sets property by button ID.
-    let clrButtons = document.querySelectorAll(".clrButton");
-    let thcButtons = document.querySelectorAll(".thcButton");
-    let undoButton = document.getElementById("undoStroke");
-    let clearButton = document.getElementById("clearCanvas");
-
-    clrButtons.forEach(function(elem) {
-        elem.addEventListener("click", function() {
-            changeStrokeColour(elem.id.split("-").pop());
-        });
-    });
-    
-    thcButtons.forEach(function(elem) {
-        elem.addEventListener("click", function() {
-            changeStrokeThiccness(elem.id.split("-").pop());
-        });
-    });
-
-    undoButton.addEventListener("click", function() {undoStroke()});
-    clearButton.addEventListener("click", function() {clearCanvas()});
-}
-
-function setupGeneralListeners(){
-    window.addEventListener('resize', resize);
-    window.addEventListener('mouseup', stopDraw, {passive: true});
-    canvas.addEventListener('mousemove', draw, {passive: true});
-    canvas.addEventListener('touchmove', draw, {passive: true});
-    canvas.addEventListener('mousedown', startDraw, {passive: true});
-    canvas.addEventListener('touchstart', startDraw, {passive: true});
-    canvas.addEventListener('touchstart', stopDraw, {passive: true});
 }

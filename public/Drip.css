@@ -37,3 +37,11 @@ div {
 canvas{
     background: beige
 }
+
+button{
+    width: 0.5rem;
+    height: 0.25rem;
+    cursor: pointer;
+    padding: 14px 28px;
+    text-align: center;
+}
