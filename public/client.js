@@ -1,8 +1,10 @@
 //get the socket, don't autoconnect though because we need cookies first mmm cookies
 var socket = io({autoConnect: false});
 
+
+//TODO CHANGE ALL session storage to local storage
 //get cookie mmmm
-var player = {sessionID: localStorage.getItem('sessionID'), username: localStorage.getItem('username'), roomID: localStorage.getItem('roomID')};
+var player = {sessionID: sessionStorage.getItem('sessionID'), username: sessionStorage.getItem('username'), roomID: sessionStorage.getItem('roomID')};
 socket.auth = {player};
 socket.connect();
 
@@ -36,7 +38,6 @@ joinRoomBtn.addEventListener('click', () => {
 confirmJoinRoom.addEventListener('click', (e)=> {e.preventDefault(),joinRoom(document.getElementById('roomInput').value);});
 
 newRoomBtn.addEventListener('click',() => { 
-    console.log('clock');
     socket.emit('new',(response) => {
         if (response.status == 404) alert ('Room could not be created');
         else setRoom(response.code);
@@ -47,24 +48,32 @@ newRoomBtn.addEventListener('click',() => {
 socket.on('connect_error', (err) =>{
     console.log(err.message);
     if(err.message == 'missing session'){
-        console.log('1');
         player.sessionID = err.data.sessionID;
         socket.auth = {player};
-        localStorage.setItem('sessionID',err.data.sessionID);
+        sessionStorage.setItem('sessionID',err.data.sessionID);
         console.log(err.data.nameNeeded);
         if(err.data.nameNeeded) displayUserPrompt(); 
     }
 });
+
 socket.on('session_connected',(sessionDetails) => {
-    console.log('4');
-    console.log(JSON.stringify(sessionDetails));
     player = sessionDetails;
-    //localStorage.setItem('sessionID',sessionDetails.player.sessionID);
+    socket.auth = {player};
     if(sessionDetails.roomID) {joinRoom(sessionDetails.roomID);};
 });
 socket.on('username_needed',()=>{
     displayUserPrompt();
 });
+
+socket.on('player_list',(players)=>{
+    membersList.innerHTML = '';
+    for (let i = 0; i < players.length; i++){
+        let member = document.createElement('li');
+        member.innerHTML = players[i].username + (players[i].isHost ? ' (Host)' : '') + (players[i].isConnected ? '' : ' (dc\'d)');
+        membersList.appendChild(member);
+    }
+});
+
 
 //logic
 //displayRoomPrompt();
@@ -72,10 +81,12 @@ socket.on('username_needed',()=>{
 
 // action functions
 
+
+
 function setUsername(username){
     player.username = username;
     socket.auth = {player};
-    localStorage.setItem('username', player.username);
+    sessionStorage.setItem('username', player.username);
     socket.emit('update username', player.username);
 };
 
@@ -83,7 +94,7 @@ function setRoom(roomCode){
     player.roomID = roomCode;
     socket.auth = {player};
     roomCodeDisplay.innerHTML = 'Room Code: ' + roomCode;
-    localStorage.setItem('roomID',roomCode);
+    sessionStorage.setItem('roomID',roomCode);
     displayLobby();
 };
 
