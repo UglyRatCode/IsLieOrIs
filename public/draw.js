@@ -8,7 +8,7 @@ var pos = {
     x: 0,
     y: 0
 };
-var strokeColour = "#FF0000";
+var strokeColour = "#000000";
 var strokeThiccness = 6;
 
 //Any changes to colour / stroke width to be made in dictionaries below. 
@@ -17,6 +17,10 @@ const colours = {
     "Red": "#FF0000",
     "Blue": "#0000FF",
     "Green": "#00FF00",
+    "White": "#FFFFFF",
+    "Yellow": "#FFFF00",
+    "Cyan": "#00FFFF",
+    "Magenta": "#FF00FF"
 };
 
 const thicnesses = {
@@ -31,47 +35,11 @@ const thicnesses = {
 var undo_array = [];
 var redo_array = [];
 
-//Sets up button functions - pulls by button class, sets property by button ID.
-let clrButtons = document.querySelectorAll(".clrButton");
-let thcButtons = document.querySelectorAll(".thcButton");
-
-clrButtons.forEach(function(elem) {
-    elem.addEventListener("click", function() {
-        changeStrokeColour(elem.id.split("-").pop());
-    });
-});
-
-thcButtons.forEach(function(elem) {
-    elem.addEventListener("click", function() {
-        changeStrokeThiccness(elem.id.split("-").pop());
-    });
-});
-
 resize();
-
-//add event listeners
-window.addEventListener('resize', resize);
-canvas.addEventListener('mousemove', draw, {
-    passive: true
-});
-canvas.addEventListener('touchmove', draw, {
-    passive: true
-});
-canvas.addEventListener('mousedown', startDraw, {
-    passive: true
-});
-canvas.addEventListener('touchstart', startDraw, {
-    passive: true
-});
-window.addEventListener('mouseup', stopDraw, {
-    passive: true
-});
-canvas.addEventListener('touchstart', stopDraw, {
-    passive: true
-});
+setupButtons();
+setupGeneralListeners();
 
 //beware, functions below
-
 //resize canvas to half window size
 function resize() {
     ctx.canvas.width = window.innerWidth / 2;
@@ -139,4 +107,38 @@ function restoreState(pop) {
             ctx.drawImage(myImage, 0, 0, canvas.width, canvas.height);
         }
     }
+}
+
+function setupButtons(){
+
+    //Sets up button functions - pulls by button class, sets property by button ID.
+    let clrButtons = document.querySelectorAll(".clrButton");
+    let thcButtons = document.querySelectorAll(".thcButton");
+    let undoButton = document.getElementById("undoStroke");
+    let clearButton = document.getElementById("clearCanvas");
+
+    clrButtons.forEach(function(elem) {
+        elem.addEventListener("click", function() {
+            changeStrokeColour(elem.id.split("-").pop());
+        });
+    });
+    
+    thcButtons.forEach(function(elem) {
+        elem.addEventListener("click", function() {
+            changeStrokeThiccness(elem.id.split("-").pop());
+        });
+    });
+
+    undoButton.addEventListener("click", function() {undoStroke()});
+    clearButton.addEventListener("click", function() {clearCanvas()});
+}
+
+function setupGeneralListeners(){
+    window.addEventListener('resize', resize);
+    window.addEventListener('mouseup', stopDraw, {passive: true});
+    canvas.addEventListener('mousemove', draw, {passive: true});
+    canvas.addEventListener('touchmove', draw, {passive: true});
+    canvas.addEventListener('mousedown', startDraw, {passive: true});
+    canvas.addEventListener('touchstart', startDraw, {passive: true});
+    canvas.addEventListener('touchstart', stopDraw, {passive: true});
 }
