@@ -12,23 +12,28 @@ app.get('/', (req, res) => {
 var server = app.listen(glblPort, () => { console.log('the server is now running on port ', glblPort) });
 
 var io = require('socket.io')(server);
+var timeOutDuration = 600000;
 var activeplayers = [];
 var activegames = [];
+var sessionHitList = [];
 
 //session middleware
 io.use((socket,next)=>
     {  
-        let authPlayer = socket.handshake.auth.player; 
+        let authPlayer = socket.handshake.auth.player;
         //if session doesnt exist, send back a session id in an error
-        if (!authPlayer.sessionID){
+        if (!authPlayer.sessionID || !getSessionIndex(authPlayer.sessionID)){
             console.log('1');
             const err = new Error("missing session");
             err.data = {sessionID: newSessionID(), nameNeeded: !authPlayer.username};
-            socket.player = new player(err.data.sessionID,null,null);
+            socket.player = new player(err.data.sessionID,null,null,true);
             activeplayers.push(socket.player); 
             next(err);
         } else {
-            socket.player = new player(authPlayer.sessionID, authPlayer.username, authPlayer.roomID);
+            let roomPassBack = getRoomIndex(authPlayer.roomID) || false;
+            socket.player = new player(authPlayer.sessionID, authPlayer.username, roomPassBack,true);
+            removeFromHitList(socket.player.sessionID);
+            activeplayers[getSessionIndex(authPlayer.sessionID)] = socket.player;
             console.log('userneeded? ' + (authPlayer.username || false));
             next();
         } 
@@ -45,7 +50,7 @@ io.on('connection', (socket)=>{
         socket.player.username = username;
     });
     socket.on('join',(room,response)=>{
-        if(roomExists(room)){
+        if(getRoomIndex(room)){
             socket.join(room);
             socket.player.roomID = room;
             io.to(room).emit('new_connection');
@@ -62,9 +67,26 @@ io.on('connection', (socket)=>{
             socket.player.roomID = id;
             response({status:200, code:newgame.roomID});
     }});
+    socket.on('disconnect',() => {
+        activeplayers[getSessionIndex(socket.player.sessionID)].hitListIndex = sessionHitList.push(setTimeout(()=>killSession(socket.player.sessionID),timeOutDuration));
+    });
 });
 
 //functions
+
+function killSession(sessionID){
+    activeplayers.splice(getSessionIndex(sessionID),1);
+};
+
+function removeFromHitList(sessionID){
+    let hitIndex = activeplayers[getSessionIndex(sessionID)].hitListIndex;
+    if(hitIndex > -1) {
+        console.log("saved ur life");
+        clearTimeout(sessionHitList[hitIndex]);
+        sessionHitList.splice(hitIndex,1);
+    }
+};
+
 function newRoomID(){
     let randID = Math.random().toString(36).slice(2,8);
     if(activegames.indexOf(randID) > -1)
@@ -89,10 +111,18 @@ function newSessionID(){
     else return randID;
 };
 
-function roomExists(id){
+function getSessionIndex(id){
+    for (let i=0;i<activeplayers.length;i++){
+        if (activeplayers[i].sessionID == id)
+            return i;
+    }
+    return false;
+}
+
+function getRoomIndex(id){
     for (let i=0;i<activegames.length;i++){
         if (activegames[i].roomID == id)
-            return true;
+            return i;
     }
     return false;
 }
@@ -114,9 +144,12 @@ class game {
 };
 
 class player {
-    constructor(sessionID, username, roomID){
+    constructor(sessionID, username, roomID, hitListIndex = -1){
         this.sessionID = sessionID;
         this.username = username;
         this.roomID = roomID;
+        this.hitListIndex = hitListIndex;
     }
 };
+
+const teams = {"TeamA":1,"TeamB":2};
