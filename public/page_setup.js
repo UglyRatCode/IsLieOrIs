@@ -1,28 +1,33 @@
 //File for HTML page setup outside of HTML file.
 
-//TODO - improve
-function setupButtons(){
+function main(){
+    //Any DOM elements to be setup to be added below
+    setupGeneralListeners();
+    colourButtonSetup();
+    strokeWidthButtonSetup();
 
-    //Sets up button functions - pulls by button class, sets property by button ID.
-    let clrButtons = document.querySelectorAll(".clrButton");
-    let thcButtons = document.querySelectorAll(".thcButton");
-    let undoButton = document.getElementById("undoStroke");
-    let clearButton = document.getElementById("clearCanvas");
+    document.getElementById("undoStroke").addEventListener("click", function() {undoStroke()});
+    document.getElementById("clearCanvas").addEventListener("click", function() {clearCanvas()});
+}
 
-    clrButtons.forEach(function(elem) {
-        elem.addEventListener("click", function() {
-            changeStrokeColour(elem.id.split("-").pop());
-        });
-    });
-    
-    thcButtons.forEach(function(elem) {
-        elem.addEventListener("click", function() {
-            changeStrokeThiccness(elem.id.split("-").pop());
-        });
-    });
+function colourButtonSetup(){
+    for (const[key, value] of Object.entries(colours)) {
+        let cB = document.createElement("BUTTON");
+        cB.setAttribute("id", `clr-${key}`);
+        cB.addEventListener("click", ()=> changeStrokeColour(key));
+        cB.style.background = value;
+        document.getElementById("colour-buttons").appendChild(cB);
+    }
+}
 
-    undoButton.addEventListener("click", function() {undoStroke()});
-    clearButton.addEventListener("click", function() {clearCanvas()});
+function strokeWidthButtonSetup(){
+    for (const[key, value] of Object.entries(thicnesses)) {
+        let cB = document.createElement("BUTTON");
+        cB.setAttribute("id", `thc-${key}`);
+        cB.addEventListener("click", ()=> changeStrokeThiccness(key));
+        cB.textContent = key;
+        document.getElementById("thc-buttons").appendChild(cB);
+    }
 }
 
 function setupGeneralListeners(){
@@ -35,7 +40,5 @@ function setupGeneralListeners(){
     canvas.addEventListener('touchstart', stopDraw, {passive: true});
 }
 
-setupButtons();
-setupGeneralListeners();
-
+main();
 

@@ -26,9 +26,9 @@ const colours = {
 const thicnesses = {
     "Small": 2,
     "Normal": 4,
-    "Large": 8,
-    "XL": 16,
-    "2XL": 32
+    "Large": 6,
+    "XL": 8,
+    "2XL": 12
 };
 
 //Arrays for remembering user strokes to allow undo/redo functionality
@@ -36,8 +36,6 @@ var undo_array = [];
 var redo_array = [];
 
 resize();
-// setupButtons();
-// setupGeneralListeners();
 
 //beware, functions below
 //resize canvas to half window size
@@ -74,11 +72,12 @@ function startDraw(e) {
 }
 
 function stopDraw(e) {
-    if (isDrawing) isDrawing = false;
+    isDrawing = false;
 }
 
 function changeStrokeColour(colour) {
     strokeColour = colours[colour];
+    console.log(`Trying to change colour to: ${colour}`)
 }
 
 function changeStrokeThiccness(thiccness) {
