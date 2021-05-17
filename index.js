@@ -71,6 +71,11 @@ io.on('connection', (socket)=>{
             response({status:200, code:newgame.roomID});
             io.to(socket.player.roomID).emit('player_list',activegames[getRoomIndex(socket.player.roomID)].players);
     }});
+    socket.on('broadcast_image', (imgData)=>{
+        if (getRoomIndex(socket.player.roomID)>-1){
+            socket.to(socket.player.roomID).emit('image_stream',(imgData));
+        }
+    });
     socket.on('disconnect',() => {
         let roomIndex = getRoomIndex(socket.player.roomID);
         console.log('attempting to disconnect, roomindex '+ roomIndex);
@@ -218,7 +223,7 @@ class game {
 };
 
 class player {
-    constructor(sessionID, username, roomID, team = teams.None, isHost = false,isConnected = true, hitListIndex = -1){
+    constructor(sessionID, username, roomID, team = teams.None, isHost = false,isTurn = false, isConnected = true, hitListIndex = -1){
         this.sessionID = sessionID;
         this.username = username;
         this.roomID = roomID;
@@ -230,3 +235,5 @@ class player {
 };
 
 const teams = {"None": 0, "TeamA":1,"TeamB":2};
+
+const roundTypes = {"TextLies":0, "Possession":1,"ThisIsMy":2, "Location":3};

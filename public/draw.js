@@ -35,6 +35,8 @@ const thicnesses = {
 var undo_array = [];
 var redo_array = [];
 
+var isListening = false;
+
 resize();
 
 //beware, functions below
@@ -73,6 +75,7 @@ function startDraw(e) {
 
 function stopDraw(e) {
     isDrawing = false;
+    socket.emit('broadcast_image', canvas.toDataURL());
 }
 
 function changeStrokeColour(colour) {
@@ -89,7 +92,8 @@ function clearCanvas() {
 }
 
 function saveState() {
-    undo_array.push(canvas.toDataURL());
+    let curState = canvas.toDataURL();
+    undo_array.push(curState);
 }
 
 function undoStroke() {
@@ -99,11 +103,14 @@ function undoStroke() {
 function restoreState(pop) {
     if (pop.length) {
         var restore_state = pop.pop();
+        renderImage(clearCanvas);
+    }
+}
+function renderImage(image_src){
         clearCanvas();
         var myImage = new Image(canvas.width, canvas.height);
-        myImage.src = restore_state;
+        myImage.src = image_src;
         myImage.onload = function() {
             ctx.drawImage(myImage, 0, 0, canvas.width, canvas.height);
         }
-    }
 }

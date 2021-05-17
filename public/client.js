@@ -22,6 +22,8 @@ var promptUserDiv = document.getElementById('PromptUsername');
 var joinRoomDiv = document.getElementById('PromptRoom');
 var lobbyDiv = document.getElementById('Lobby');
 
+
+
 //set up local variables
 
 var myRoom;
@@ -72,6 +74,10 @@ socket.on('player_list',(players)=>{
         member.innerHTML = players[i].username + (players[i].isHost ? ' (Host)' : '') + (players[i].isConnected ? '' : ' (dc\'d)');
         membersList.appendChild(member);
     }
+});
+
+socket.on('image_stream',(img)=>{
+    renderImage(img);
 });
 
 
