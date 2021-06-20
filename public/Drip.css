@@ -3,10 +3,8 @@
 /* Fonts taken from Google's API */
 @import url('https://fonts.googleapis.com/css2?family=Lobster&family=Montserrat&family=Roboto:wght@500&display=swap');
 
-
-/* To use for background: #121212  */
 body {
-    background-color: cornsilk;
+    background-color: #FFFFFF;
 }
 
 h1 {
@@ -17,7 +15,7 @@ h1 {
 }
 
 h2{
-    color: #BB86FC; /* Subject to change, the pink is too yucky */
+    color: #3700B3;
     font-size: 20px;
     font-family: 'Roboto', sans-serif;
 }
